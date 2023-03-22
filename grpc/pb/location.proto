@@ -1,0 +1,17 @@
+syntax="proto3";
+package proto;
+option go_package="./pb";
+
+service Location {
+  rpc SendLocation(stream SendLocationRequest)  returns (SendLocationResponse) {}
+}
+
+message SendLocationRequest {
+  string long = 1;
+  string lat = 2;
+  string bus_id = 3;
+}
+
+message SendLocationResponse {
+  string message = 1;
+}
