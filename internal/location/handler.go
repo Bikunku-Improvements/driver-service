@@ -38,7 +38,7 @@ func (h Handler) SendLocation(server pb.Location_SendLocationServer) error {
 
 		err = h.useCase.SendLocation(server.Context(), loc)
 		if err != nil {
-			return status.Error(codes.Internal, err.Error())
+			return status.Errorf(codes.Internal, err.Error())
 		}
 	}
 }

@@ -9,6 +9,8 @@ import (
 	"log"
 	"net"
 	"os"
+	"strings"
+	"time"
 )
 
 // GrpcSrv for serving grpc services
@@ -27,10 +29,13 @@ var (
 
 func InjectDependency() {
 	// external dependencies
+	addr := strings.Split(os.Getenv("KAFKA_ADDR"), ";")
 	KafkaWriterLocation = &kafka.Writer{
-		Addr:     kafka.TCP(os.Getenv("KAFKA_ADDR")),
-		Topic:    "location",
-		Balancer: &kafka.LeastBytes{},
+		Addr:         kafka.TCP(addr...),
+		Topic:        "location",
+		Balancer:     &kafka.LeastBytes{},
+		Async:        true,
+		BatchTimeout: 10 * time.Millisecond,
 	}
 
 	// internal package

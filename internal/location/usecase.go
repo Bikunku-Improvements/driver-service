@@ -1,6 +1,8 @@
 package location
 
-import "context"
+import (
+	"context"
+)
 
 type UseCase struct {
 	repository repository
