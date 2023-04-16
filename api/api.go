@@ -35,7 +35,7 @@ func InjectDependency() {
 		Topic:        "location",
 		Balancer:     &kafka.LeastBytes{},
 		Async:        true,
-		BatchTimeout: 10 * time.Millisecond,
+		BatchTimeout: 5 * time.Millisecond,
 	}
 
 	// internal package
