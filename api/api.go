@@ -31,11 +31,12 @@ func InjectDependency() {
 	// external dependencies
 	addr := strings.Split(os.Getenv("KAFKA_ADDR"), ";")
 	KafkaWriterLocation = &kafka.Writer{
-		Addr:         kafka.TCP(addr...),
-		Topic:        "location",
-		Balancer:     &kafka.LeastBytes{},
-		Async:        true,
-		BatchTimeout: 5 * time.Millisecond,
+		Addr:                   kafka.TCP(addr...),
+		Topic:                  "location-2",
+		Balancer:               &kafka.LeastBytes{},
+		BatchTimeout:           5 * time.Millisecond,
+		AllowAutoTopicCreation: true,
+		Compression:            kafka.Snappy,
 	}
 
 	// internal package
