@@ -1,0 +1,14 @@
+{
+  "insecure" : true,
+  "proto": "./grpc/pb/location.proto",
+  "call": "proto.Location.SendLocation",
+  "data" : {
+    "bus_id": "{{newUUID}}",
+    "lat": "{{randomInt -90 90}}",
+    "long": "{{randomInt -90 90}}"
+  },
+  "stream-call-duration" : "1s",
+  "total": 5000,
+  "concurrency": 200,
+  "host": "146.148.65.10:80"
+}

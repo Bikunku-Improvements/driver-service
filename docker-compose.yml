@@ -1,0 +1,9 @@
+version: "3.9"
+services:
+  app:
+    build:
+      context: .
+    ports:
+      - "5051:5051"
+    env_file:
+      - .env

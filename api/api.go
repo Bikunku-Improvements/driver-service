@@ -30,9 +30,10 @@ var (
 func InjectDependency() {
 	// external dependencies
 	addr := strings.Split(os.Getenv("KAFKA_ADDR"), ";")
+
 	KafkaWriterLocation = &kafka.Writer{
 		Addr:                   kafka.TCP(addr...),
-		Topic:                  "location-2",
+		Topic:                  "location",
 		Balancer:               &kafka.LeastBytes{},
 		BatchTimeout:           5 * time.Millisecond,
 		AllowAutoTopicCreation: true,
