@@ -7,9 +7,10 @@ service Location {
 }
 
 message SendLocationRequest {
-  string long = 1;
-  string lat = 2;
-  string bus_id = 3;
+  float long = 1;
+  float lat = 2;
+  float speed = 3;
+  float heading = 4;
 }
 
 message SendLocationResponse {

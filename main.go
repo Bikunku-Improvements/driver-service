@@ -27,4 +27,6 @@ func main() {
 	stop()
 	api.GrpcSrv.GracefulStop()
 	api.KafkaWriterLocation.Close()
+	dbInstance, _ := api.Postgres.DB()
+	dbInstance.Close()
 }

@@ -2,7 +2,9 @@ package location
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"github.com/TA-Aplikasi-Pengiriman-Barang/driver-service/internal/dto"
 	"github.com/segmentio/kafka-go"
 	"log"
 )
@@ -11,14 +13,14 @@ type Repository struct {
 	writer *kafka.Writer
 }
 
-func (r Repository) SendLocation(ctx context.Context, loc Location) error {
-	locByte, err := loc.MarshalBinary()
+func (r Repository) SendLocation(ctx context.Context, loc dto.SendLocationDataDTO) error {
+	b, err := json.Marshal(loc)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal location: %v", err)
 	}
 
 	msg := kafka.Message{
-		Value: locByte,
+		Value: b,
 	}
 
 	err = r.writer.WriteMessages(ctx, msg)
