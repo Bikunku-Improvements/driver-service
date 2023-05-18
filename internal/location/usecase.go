@@ -11,7 +11,6 @@ type UseCase struct {
 }
 
 type repository interface {
-	//SendLocation(ctx context.Context, loc dto.SendLocationDataDTO) error
 	SendLocationWithSarama(ctx context.Context, loc dto.SendLocationDataDTO) error
 }
 

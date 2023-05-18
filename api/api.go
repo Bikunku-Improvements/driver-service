@@ -23,7 +23,6 @@ var GrpcSrv *grpc.Server
 var (
 	// Postgres will be the client for psql database
 	Postgres *gorm.DB
-
 	Producer sarama.SyncProducer
 )
 
