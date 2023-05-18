@@ -2,11 +2,11 @@ package api
 
 import (
 	"fmt"
+	"github.com/Shopify/sarama"
 	"github.com/TA-Aplikasi-Pengiriman-Barang/driver-service/grpc/pb"
 	"github.com/TA-Aplikasi-Pengiriman-Barang/driver-service/internal/bus"
 	"github.com/TA-Aplikasi-Pengiriman-Barang/driver-service/internal/location"
 	"github.com/TA-Aplikasi-Pengiriman-Barang/driver-service/internal/user"
-	"github.com/segmentio/kafka-go"
 	"google.golang.org/grpc"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -14,7 +14,6 @@ import (
 	"net"
 	"os"
 	"strings"
-	"time"
 )
 
 // GrpcSrv for serving grpc services
@@ -22,11 +21,10 @@ var GrpcSrv *grpc.Server
 
 // External services
 var (
-	// KafkaWriterLocation will be producer of location
-	KafkaWriterLocation *kafka.Writer
-
 	// Postgres will be the client for psql database
 	Postgres *gorm.DB
+
+	Producer sarama.SyncProducer
 )
 
 // internal
@@ -38,14 +36,16 @@ var (
 func InjectDependency() {
 	// external dependencies
 	addr := strings.Split(os.Getenv("KAFKA_ADDR"), ";")
-	KafkaWriterLocation = &kafka.Writer{
-		Addr:                   kafka.TCP(addr...),
-		Topic:                  "location",
-		Balancer:               &kafka.LeastBytes{},
-		BatchTimeout:           5 * time.Millisecond,
-		AllowAutoTopicCreation: true,
-		Compression:            kafka.Snappy,
+	config := sarama.NewConfig()
+	config.Producer.RequiredAcks = sarama.WaitForAll // Wait for all in-sync replicas to ack the message
+	config.Producer.Retry.Max = 10                   // Retry up to 10 times to produce the message
+	config.Producer.Return.Successes = true
+	producer, err := sarama.NewSyncProducer(addr, config)
+	if err != nil {
+		log.Println("Failed to start Sarama producer:", err)
 	}
+	log.Printf("connect to kafka with broker: %v\n", addr)
+	Producer = producer
 
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Jakarta",
@@ -63,7 +63,7 @@ func InjectDependency() {
 	Postgres = db
 
 	// internal package
-	locationRepository := location.NewRepository(KafkaWriterLocation)
+	locationRepository := location.NewRepository(Producer)
 	locationUseCase := location.NewUseCase(locationRepository)
 	grpcLocationHandler = location.NewHandler(locationUseCase)
 

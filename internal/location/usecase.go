@@ -11,11 +11,12 @@ type UseCase struct {
 }
 
 type repository interface {
-	SendLocation(ctx context.Context, loc dto.SendLocationDataDTO) error
+	//SendLocation(ctx context.Context, loc dto.SendLocationDataDTO) error
+	SendLocationWithSarama(ctx context.Context, loc dto.SendLocationDataDTO) error
 }
 
 func (u UseCase) SendLocation(ctx context.Context, loc domain.Location, bus domain.Bus) error {
-	return u.repository.SendLocation(ctx, dto.SendLocationDataDTO{
+	return u.repository.SendLocationWithSarama(ctx, dto.SendLocationDataDTO{
 		BusID:     bus.ID,
 		Number:    bus.Number,
 		Plate:     bus.Plate,

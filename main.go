@@ -26,7 +26,7 @@ func main() {
 	<-ctx.Done()
 	stop()
 	api.GrpcSrv.GracefulStop()
-	api.KafkaWriterLocation.Close()
+	api.Producer.Close()
 	dbInstance, _ := api.Postgres.DB()
 	dbInstance.Close()
 }
