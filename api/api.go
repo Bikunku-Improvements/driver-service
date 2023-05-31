@@ -1,6 +1,7 @@
 package api
 
 import (
+	"crypto/tls"
 	"fmt"
 	"github.com/Shopify/sarama"
 	"github.com/TA-Aplikasi-Pengiriman-Barang/driver-service/grpc/pb"
@@ -36,9 +37,23 @@ func InjectDependency() {
 	// external dependencies
 	addr := strings.Split(os.Getenv("KAFKA_ADDR"), ";")
 	config := sarama.NewConfig()
+	config.Version = sarama.V1_1_0_0
+
 	config.Producer.RequiredAcks = sarama.WaitForAll // Wait for all in-sync replicas to ack the message
 	config.Producer.Retry.Max = 10                   // Retry up to 10 times to produce the message
 	config.Producer.Return.Successes = true
+
+	config.Net.SASL.Enable = true
+	config.Net.SASL.User = os.Getenv("KAFKA_USERNAME")
+	config.Net.SASL.Password = os.Getenv("KAFKA_PASSWORD")
+	config.Net.SASL.Handshake = true
+	config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &XDGSCRAMClient{HashGeneratorFcn: SHA256} }
+	config.Net.SASL.Mechanism = sarama.SASLTypeSCRAMSHA256
+
+	tlsConfig := tls.Config{}
+	config.Net.TLS.Enable = true
+	config.Net.TLS.Config = &tlsConfig
+
 	producer, err := sarama.NewSyncProducer(addr, config)
 	if err != nil {
 		log.Println("Failed to start Sarama producer:", err)
