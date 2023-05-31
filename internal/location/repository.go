@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"github.com/Shopify/sarama"
 	"github.com/TA-Aplikasi-Pengiriman-Barang/driver-service/internal/dto"
-	"log"
+	"github.com/TA-Aplikasi-Pengiriman-Barang/driver-service/internal/logger"
+	"go.uber.org/zap"
 )
 
 type Repository struct {
@@ -26,7 +27,7 @@ func (r Repository) SendLocationWithSarama(ctx context.Context, loc dto.SendLoca
 	if err != nil {
 		return fmt.Errorf("failed to send message: %v", err)
 	}
-	log.Printf("message send to %v topic with value %v", "location", string(msgBytes))
+	logger.Logger.Info("message send to kafka", zap.String("topic", "location"), zap.String("value", string(msgBytes)))
 	return nil
 }
 

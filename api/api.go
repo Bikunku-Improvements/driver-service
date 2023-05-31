@@ -7,11 +7,12 @@ import (
 	"github.com/TA-Aplikasi-Pengiriman-Barang/driver-service/grpc/pb"
 	"github.com/TA-Aplikasi-Pengiriman-Barang/driver-service/internal/bus"
 	"github.com/TA-Aplikasi-Pengiriman-Barang/driver-service/internal/location"
+	"github.com/TA-Aplikasi-Pengiriman-Barang/driver-service/internal/logger"
 	"github.com/TA-Aplikasi-Pengiriman-Barang/driver-service/internal/user"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"log"
 	"net"
 	"os"
 	"strings"
@@ -56,9 +57,9 @@ func InjectDependency() {
 
 	producer, err := sarama.NewSyncProducer(addr, config)
 	if err != nil {
-		log.Println("Failed to start Sarama producer:", err)
+		logger.Logger.Fatal("failed to start producer", zap.Error(err))
 	}
-	log.Printf("connect to kafka with broker: %v\n", addr)
+	logger.Logger.Info("connect to producer", zap.Any("broker", addr))
 	Producer = producer
 
 	dsn := fmt.Sprintf(
@@ -72,8 +73,9 @@ func InjectDependency() {
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Printf("failed to connect to database, with error: %s", err.Error())
+		logger.Logger.Fatal("failed to connect to database", zap.Error(err))
 	}
+	logger.Logger.Info("connect to database")
 	Postgres = db
 
 	// internal package
@@ -98,12 +100,12 @@ func InitGRPCServer() {
 func StartGRPCServer() {
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", os.Getenv("PORT")))
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		logger.Logger.Fatal("failed to listen tcp", zap.Error(err))
 	}
 
-	log.Printf("server listening at %v", lis.Addr())
-	if err := GrpcSrv.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+	logger.Logger.Info("server listening", zap.Any("port", lis.Addr()))
+	if err = GrpcSrv.Serve(lis); err != nil {
+		logger.Logger.Fatal("failed to server grpc", zap.Error(err))
 	}
 
 }

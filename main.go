@@ -3,19 +3,26 @@ package main
 import (
 	"context"
 	"github.com/TA-Aplikasi-Pengiriman-Barang/driver-service/api"
+	"github.com/TA-Aplikasi-Pengiriman-Barang/driver-service/internal/logger"
 	"github.com/joho/godotenv"
-	"log"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
+	config := zap.NewProductionConfig()
+	config.EncoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout(time.RFC3339)
+	logger.Logger, _ = config.Build()
+
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("Error loading .env file")
+		logger.Logger.Error("error when loading .env", zap.Error(err))
 	}
 	go func() {
 		api.InjectDependency()
@@ -29,4 +36,5 @@ func main() {
 	api.Producer.Close()
 	dbInstance, _ := api.Postgres.DB()
 	dbInstance.Close()
+	logger.Logger.Sync()
 }

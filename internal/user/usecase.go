@@ -5,9 +5,10 @@ import (
 	"github.com/TA-Aplikasi-Pengiriman-Barang/driver-service/internal/common"
 	"github.com/TA-Aplikasi-Pengiriman-Barang/driver-service/internal/domain"
 	"github.com/TA-Aplikasi-Pengiriman-Barang/driver-service/internal/dto"
+	"github.com/TA-Aplikasi-Pengiriman-Barang/driver-service/internal/logger"
 	"github.com/go-playground/validator/v10"
+	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
-	"log"
 )
 
 type BusRepository interface {
@@ -27,7 +28,7 @@ func (u *UseCase) Login(ctx context.Context, data dto.DriverLoginRequest) (*dto.
 
 	bus, err := u.busRepository.FindByUsername(ctx, data.Username)
 	if err != nil {
-		log.Printf("error when finding bus by username: %v", err)
+		logger.Logger.Error("error when finding bus by username", zap.Error(err), zap.Any("data", data))
 		return nil, err
 	}
 
@@ -36,13 +37,13 @@ func (u *UseCase) Login(ctx context.Context, data dto.DriverLoginRequest) (*dto.
 		[]byte(data.Password),
 	)
 	if err != nil {
-		log.Printf("wrong password, err: %v", err)
+		logger.Logger.Error("wrong password", zap.Error(err))
 		return nil, err
 	}
 
 	token, err := common.NewJWT(*bus)
 	if err != nil {
-		log.Printf("error when creating jwt: %v", err)
+		logger.Logger.Error("error when creating jwt", zap.Error(err), zap.Any("data", bus))
 		return nil, err
 	}
 
